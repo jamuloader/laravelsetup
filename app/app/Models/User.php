@@ -2,17 +2,25 @@
 
 namespace App\Models;
 
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class User extends Model
+#[Fillable(['name', 'email', 'password'])]
+#[Hidden(['password', 'remember_token'])]
+class User extends Authenticatable
 {
-    use HasFactory;
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Get the attributes that should be cast.
      *
-     * @var array
+     * @return array<string, string>
      */
     protected $fillable = [
         'name',
@@ -45,5 +53,11 @@ class User extends Model
             'id' => 'integer',
             'email_verified_at' => 'timestamp',
         ];
+    }
+     // Wajib untuk Filament 5: Tentukan siapa yang boleh akses admin panel
+    public function canAccessPanel(Panel $panel): bool
+    {
+        // Hanya role 'admin' dan 'editor' yang bisa masuk ke panel Filament
+        return in_array($this->role, ['admin', 'editor']);
     }
 }
